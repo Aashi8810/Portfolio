@@ -61,39 +61,27 @@ export const OrbitalHero = () => {
 
   const [nodes] = useState<NodeConfig[]>(initialNodes);
   const [currentSubtitle, setCurrentSubtitle] = useState('AI / LLM ENGINEER');
-  const [hintVisible, setHintVisible] = useState(true);
-  const [introComplete, setIntroComplete] = useState(false);
-  const [showIntro, setShowIntro] = useState(true); // Tracks DOM existence of the background text
+  const [hintVisible, setHintVisible] = useState(false);
+  
+  // Cinematic Intro States
+  const [introPhase, setIntroPhase] = useState<'intro' | 'transition' | 'active'>('intro');
+  const introAnimProgress = useRef(0);
 
   const phrases = ["I'm Aashinshana Weerakoon.", "An AI/ML Enthusiast and a Researcher."];
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const introCompleteRef = useRef(false);
-
   useEffect(() => {
-    introCompleteRef.current = introComplete;
-  }, [introComplete]);
-
-  useEffect(() => {
-    // 1. Trigger the CSS fade animation
-    const fadeTimer = setTimeout(() => {
-      setIntroComplete(true);
+    const timer = setTimeout(() => {
+      setIntroPhase('transition');
     }, 2500);
-
-    // 2. Unmount the elements from the DOM after the 2.5s fade completes
-    const unmountTimer = setTimeout(() => {
-      setShowIntro(false);
-    }, 5000); 
-    
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(unmountTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
+    if (introPhase !== 'active') return;
+
     const currentPhrase = phrases[phraseIndex] || '';
     let timer: NodeJS.Timeout;
 
@@ -117,7 +105,7 @@ export const OrbitalHero = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [displayedText, isDeleting, phraseIndex]);
+  }, [displayedText, isDeleting, phraseIndex, introPhase]);
 
   const hoveredNodeRef = useRef<NodeConfig | null>(null);
   const activeShockwaveRef = useRef<Shockwave | null>(null);
@@ -227,13 +215,14 @@ export const OrbitalHero = () => {
       });
     };
 
-    const drawCore = (t: number) => {
+    // Removed tiltOverride from here. The sphere should ALWAYS be a perfect circle.
+    const drawCore = (t: number, customCy: number, scaleMultiplier: number) => {
       const pulse = 1 + Math.sin(t * 0.0018) * 0.03;
-      const r = 45 * pulse;
+      const r = (45 * pulse) * scaleMultiplier;
 
+      // Outer Glow
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(1, TILT * 0.7 + 0.3);
+      ctx.translate(cx, customCy);
       ctx.beginPath();
       ctx.arc(0, 0, r * 2.6, 0, Math.PI * 2);
       const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.6);
@@ -244,16 +233,18 @@ export const OrbitalHero = () => {
       ctx.fill();
       ctx.restore();
 
+      // Inner Core Clip
       ctx.save();
+      ctx.translate(cx, customCy);
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.clip();
 
       const coreAngle = t * 0.0008;
-      const fluxX = cx + Math.cos(coreAngle) * (r * 0.25);
-      const fluxY = cy + Math.sin(coreAngle) * (r * 0.15);
+      const fluxX = Math.cos(coreAngle) * (r * 0.25);
+      const fluxY = Math.sin(coreAngle) * (r * 0.15);
 
-      const coreGrad = ctx.createRadialGradient(fluxX, fluxY, r * 0.1, cx, cy, r);
+      const coreGrad = ctx.createRadialGradient(fluxX, fluxY, r * 0.1, 0, 0, r);
       coreGrad.addColorStop(0, '#FFFFFF');
       coreGrad.addColorStop(0.4, LIME);
       coreGrad.addColorStop(1, '#A2C800');
@@ -261,11 +252,15 @@ export const OrbitalHero = () => {
       ctx.fill();
       ctx.restore();
 
+      // Border
+      ctx.save();
+      ctx.translate(cx, customCy);
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(255,255,255,0.4)';
       ctx.lineWidth = 1;
       ctx.stroke();
+      ctx.restore();
     };
 
     const drawNode = (n: NodeConfig, alpha: number, t: number, scaleMultiplier = 1) => {
@@ -432,77 +427,109 @@ export const OrbitalHero = () => {
 
       ctx.clearRect(0, 0, W, H);
       drawStars();
-      drawRings();
-      drawCore(ts); 
 
-      if (introCompleteRef.current && assembleQueue.length > 0) {
-        if (lastAssemble === 0) {
-          lastAssemble = ts; 
+      // CINEMATIC MATH
+      const maxR = Math.max(W, H) * 0.8; 
+      const giantScale = maxR / 45;
+      const startCy = H + maxR - (H * 0.35); // Top slice perfectly covers bottom 1/3
+
+      let currentScale = 1;
+      let currentCy = cy;
+
+      if (introPhase === 'intro') {
+        currentScale = giantScale;
+        currentCy = startCy;
+      } else if (introPhase === 'transition') {
+        introAnimProgress.current += 0.015; // Smooth transition speed
+        if (introAnimProgress.current >= 1) {
+          introAnimProgress.current = 1;
+          setIntroPhase((prev) => {
+             if (prev !== 'active') return 'active';
+             return prev;
+          });
         }
         
-        if (ts - lastAssemble > assembleInterval) {
-          const next = assembleQueue.shift()!;
-          next.visible = true;
-          next.flyProgress = 0;
-          assembled.push(next);
-          lastAssemble = ts;
-          if (assembleQueue.length === 0) {
-            setTimeout(() => {
-              allAssembled = true;
-              if (centerLabelRef.current) centerLabelRef.current.style.opacity = '1';
-              if (hintRef.current) hintRef.current.style.opacity = '1';
-            }, 600);
-          }
-        }
+        const p = easeOutCubic(introAnimProgress.current);
+        currentScale = giantScale + (1 - giantScale) * p;
+        currentCy = startCy + (cy - startCy) * p;
       }
 
-      const activeHover = checkHover();
+      // Draw the core dynamically (always perfectly round)
+      drawCore(ts, currentCy, currentScale);
 
-      assembled.forEach((n) => {
-        if (n.flyProgress !== undefined && n.flyProgress < 1) {
-          n.flyProgress = Math.min(1, n.flyProgress + 0.022);
-          const p = easeOutCubic(n.flyProgress);
-          const target = orbitXY(n.angle, n.orbit);
-          if (n.flyFrom) {
-            n.x = n.flyFrom.x + (target.x - n.flyFrom.x) * p;
-            n.y = n.flyFrom.y + (target.y - n.flyFrom.y) * p;
-          }
-          drawNode(n, p, ts, 1.0);
-        } else {
-          n.angle += n.speed * dt;
-          const pos = orbitXY(n.angle, n.orbit);
-          n.x = pos.x;
-          n.y = pos.y;
+      if (introPhase === 'active') {
+        drawRings();
 
-          const isHovered = activeHover && activeHover.label === n.label;
-          if (isHovered) {
-            drawConnectionLine(n);
+        if (assembleQueue.length > 0) {
+          if (lastAssemble === 0) {
+            lastAssemble = ts; 
           }
           
-          drawNode(n, 1, ts, isHovered ? 1.35 : 1.0);
+          if (ts - lastAssemble > assembleInterval) {
+            const next = assembleQueue.shift()!;
+            next.visible = true;
+            next.flyProgress = 0;
+            assembled.push(next);
+            lastAssemble = ts;
+            if (assembleQueue.length === 0) {
+              setTimeout(() => {
+                allAssembled = true;
+                if (centerLabelRef.current) centerLabelRef.current.style.opacity = '1';
+                setHintVisible(true);
+              }, 600);
+            }
+          }
         }
-      });
 
-      drawShockwave(ts);
-      updateLabels(activeHover);
-      
-      const anglesToSave = assembled.map(n => n.angle);
-      sessionStorage.setItem('aashi_orbit_angles', JSON.stringify(anglesToSave));
+        const activeHover = checkHover();
 
-      const currentHovered = activeHover;
-      const previouslyHovered = hoveredNodeRef.current;
+        assembled.forEach((n) => {
+          if (n.flyProgress !== undefined && n.flyProgress < 1) {
+            n.flyProgress = Math.min(1, n.flyProgress + 0.022);
+            const p = easeOutCubic(n.flyProgress);
+            const target = orbitXY(n.angle, n.orbit);
+            if (n.flyFrom) {
+              n.x = n.flyFrom.x + (target.x - n.flyFrom.x) * p;
+              n.y = n.flyFrom.y + (target.y - n.flyFrom.y) * p;
+            }
+            drawNode(n, p, ts, 1.0);
+          } else {
+            n.angle += n.speed * dt;
+            const pos = orbitXY(n.angle, n.orbit);
+            n.x = pos.x;
+            n.y = pos.y;
 
-      if (currentHovered?.label !== previouslyHovered?.label) {
-        hoveredNodeRef.current = currentHovered;
-        if (currentHovered) {
-          setCurrentSubtitle(currentHovered.subtitle);
-          setHintVisible(false);
-        } else {
-          setCurrentSubtitle('AI / LLM ENGINEER');
+            const isHovered = activeHover && activeHover.label === n.label;
+            if (isHovered) {
+              drawConnectionLine(n);
+            }
+            
+            drawNode(n, 1, ts, isHovered ? 1.35 : 1.0);
+          }
+        });
+
+        drawShockwave(ts);
+        updateLabels(activeHover);
+        
+        const anglesToSave = assembled.map(n => n.angle);
+        sessionStorage.setItem('aashi_orbit_angles', JSON.stringify(anglesToSave));
+
+        const currentHovered = activeHover;
+        const previouslyHovered = hoveredNodeRef.current;
+
+        if (currentHovered?.label !== previouslyHovered?.label) {
+          hoveredNodeRef.current = currentHovered;
+          if (currentHovered) {
+            setCurrentSubtitle(currentHovered.subtitle);
+            setHintVisible(false);
+          } else {
+            setCurrentSubtitle('AI / LLM ENGINEER');
+          }
         }
+
+        container.style.cursor = activeHover ? 'pointer' : 'default';
       }
 
-      container.style.cursor = activeHover ? 'pointer' : 'default';
       animationFrameId = requestAnimationFrame(loop);
     };
 
@@ -513,7 +540,7 @@ export const OrbitalHero = () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [introPhase, nodes]);
 
   const handleNodeClick = (e: React.MouseEvent) => {
     const activeHover = hoveredNodeRef.current;
@@ -546,36 +573,18 @@ export const OrbitalHero = () => {
         }}
       />
 
-      {/* DYNAMIC RENDERING: Completely removes elements from layout tree after fade-out */}
-      {showIntro && (
-        <div
-          className={`absolute inset-0 pointer-events-none select-none z-0 transition-all duration-[2500ms] ease-out ${
-            introComplete 
-              ? 'opacity-0 scale-[1.4] blur-[4px]' 
-              : 'opacity-90 scale-100 blur-0'
-          }`}
-        >
-          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 text-3xl md:text-5xl font-black tracking-[0.4em] text-white uppercase text-center w-full">
-            welcome
-          </div>
-          <div className="absolute top-1/2 left-[calc(50%-240px)] -translate-x-1/2 -translate-y-1/2 text-3xl md:text-5xl font-black tracking-[0.4em] text-white uppercase text-right w-40 hidden md:block">
-            to
-          </div>
-          <div className="absolute top-1/2 left-8 -translate-y-1/2 text-3xl font-black tracking-[0.2em] text-white uppercase block md:hidden">
-            to
-          </div>
-          <div className="absolute top-1/2 left-[calc(50%+240px)] -translate-x-1/2 -translate-y-1/2 text-3xl md:text-5xl font-black tracking-[0.4em] text-white uppercase text-left w-40 hidden md:block">
-            my
-          </div>
-          <div className="absolute top-1/2 right-8 -translate-y-1/2 text-3xl font-black tracking-[0.2em] text-white uppercase block md:hidden">
-            my
-          </div>
-          <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 text-3xl md:text-5xl font-black tracking-[0.4em] text-white uppercase text-center w-full">
-            universe
-          </div>
-        </div>
-      )}
+      {/* "WELCOME" LAYER: Z-[5] places it perfectly behind the canvas (Z-10) */}
+      <div
+        className={`absolute inset-0 pointer-events-none select-none z-[5] flex flex-col items-center justify-center transition-opacity duration-700 ease-out ${
+          introPhase === 'intro' ? 'opacity-80' : 'opacity-0'
+        }`}
+      >
+         <h1 className="text-white text-5xl md:text-7xl font-black uppercase tracking-[0.4em] mb-12">
+           WELCOME
+         </h1>
+      </div>
 
+      {/* "AASHI" LAYER: Same Z-[5] depth, fades in when active. Blur removed for clarity. */}
       <div
         ref={centerLabelRef}
         className="absolute top-[calc(50%-55px)] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none opacity-0 transition-all duration-1000 z-[5]"
@@ -588,54 +597,57 @@ export const OrbitalHero = () => {
         </h1>
       </div>
 
+      {/* CANVAS: Z-10 creates the occlusion mask for the text */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-10 bg-transparent" />
 
-      <div className="absolute top-6 left-6 flex flex-col font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40">
-        <span>System // Active</span>
-        <span className="opacity-40">v2.0.26</span>
-      </div>
+      {/* ALL OTHER UI ELEMENTS: Only mount or become visible when active */}
+      <div className={`transition-opacity duration-1000 ${introPhase === 'active' ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="absolute top-6 left-6 flex flex-col font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40">
+          <span>System // Active</span>
+          <span className="opacity-40">v2.0.26</span>
+        </div>
 
-      <div className="absolute top-6 right-6 font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40 text-right">
-        <span>Based in Sri Lanka</span>
-      </div>
+        <div className="absolute top-6 right-6 font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40 text-right">
+          <span>Based in Sri Lanka</span>
+        </div>
 
-      {/* PREMIUM WRAPPER: Now uses 'w-fit' to perfectly hug text length and 'rounded-2xl' for smooth edges */}
-      <div className="absolute bottom-12 left-6 z-40 select-none">
-        <div className="backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-6 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-fit">
-          <p 
-            className="text-white/90 uppercase text-lg sm:text-xl md:text-2xl tracking-[0.2em] font-black drop-shadow-[0_0_8px_rgba(210,255,0,0.4)] whitespace-nowrap"
-            style={{ fontVariationSettings: '"wght" 900, "wdth" 90' }}
+        <div className="absolute bottom-12 left-6 z-40 select-none">
+          <div className="backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-6 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-fit">
+            <p 
+              className="text-white/90 uppercase text-lg sm:text-xl md:text-2xl tracking-[0.2em] font-black drop-shadow-[0_0_8px_rgba(210,255,0,0.4)] whitespace-nowrap"
+              style={{ fontVariationSettings: '"wght" 900, "wdth" 90' }}
+            >
+              {displayedText}
+              <span className="animate-pulse ml-2 text-[#D2FF00] drop-shadow-[0_0_10px_rgba(210,255,0,0.8)]">_</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 right-6 font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40 text-right">
+          <span>©2026 Aashi</span>
+        </div>
+
+        {initialNodes.map((n) => (
+          <div
+            key={n.label}
+            ref={(el) => {
+              labelRefs.current[n.label] = el;
+            }}
+            className="absolute text-[13px] tracking-[0.14em] uppercase pointer-events-none opacity-0 transition-opacity duration-300 font-bold whitespace-nowrap z-20 text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
           >
-            {displayedText}
-            <span className="animate-pulse ml-2 text-[#D2FF00] drop-shadow-[0_0_10px_rgba(210,255,0,0.8)]">_</span>
-          </p>
-        </div>
+            {n.label}
+          </div>
+        ))}
+
+        {hintVisible && (
+          <div
+            ref={hintRef}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] text-[var(--grey-ot)] tracking-[0.14em] uppercase opacity-100 transition-opacity duration-1000 z-40"
+          >
+            hover a sphere to explore
+          </div>
+        )}
       </div>
-
-      <div className="absolute bottom-6 right-6 font-mono text-[9px] text-[var(--grey-ot)] tracking-[0.2em] uppercase z-40 text-right">
-        <span>©2026 Aashi</span>
-      </div>
-
-      {initialNodes.map((n) => (
-        <div
-          key={n.label}
-          ref={(el) => {
-            labelRefs.current[n.label] = el;
-          }}
-          className="absolute text-[13px] tracking-[0.14em] uppercase pointer-events-none opacity-0 transition-opacity duration-300 font-bold whitespace-nowrap z-20 text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.6)]"
-        >
-          {n.label}
-        </div>
-      ))}
-
-      {hintVisible && (
-        <div
-          ref={hintRef}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.65rem] text-[var(--grey-ot)] tracking-[0.14em] uppercase opacity-0 transition-opacity duration-1000 z-40"
-        >
-          hover a sphere to explore
-        </div>
-      )}
     </div>
   );
 };
