@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+:root {
+  /* Palette */
+  --lime:         #D2FF00;
+  --lime-off:     #C8F000;
+  --dark-green:   #282C20;
+  --black:        #101400;
+  --white:        #FFFFFF;
+  --grey-2:       #D0D4C0;
+  --grey-1:       #B0B5A0;
+  --grey-ot:      #6B7060;
+  --off-white:    #E8EDD8;
+
+  /* Animation */
+  --ease-default: cubic-bezier(0.65, 0.05, 0, 1);
+  --dur-default:  0.75s;
+  --dur-slow:     1.2s;
+  --dur-fast:     0.35s;
+
+  /* Layout */
+  --max-content:  1200px;
+  --gutter:       clamp(1.5rem, 4vw, 5rem);
+}
+
+/* Background rule & Base Typography */
+body {
+  background-color: var(--dark-green);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: 'Mona Sans', sans-serif;
+  text-wrap: pretty;
+  line-height: 1.65;
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection Highlight */
+::selection { 
+  background: var(--lime); 
+  color: var(--black); 
+}
+
+/* Scrollbar Hiding */
+* { 
+  scrollbar-width: none; 
+}
+*::-webkit-scrollbar { 
+  display: none; 
+}
+
+/* Focus Rings */
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+/* Link Hover — Underline Slide */
+.text-link {
+  position: relative;
+  text-decoration: none;
+}
+.text-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; 
+  left: 0;
+  width: 0; 
+  height: 1px;
+  background: var(--lime);
+  transition: width 0.3s var(--ease-default);
+}
+.text-link:hover::after { 
+  width: 100%; 
+}
+
+/* Typography Utility Classes */
+.type-impact {
+  font-family: 'Mona Sans', sans-serif;
+  font-size: clamp(4rem, 9vw, 8.5rem);
+  font-variation-settings: "wght" 900, "wdth" 93;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.type-impact strong {
+  color: var(--lime-off);
+  font-family: 'Brier', 'Mona Sans', sans-serif;
+  font-weight: 900;
+  font-style: italic; /* Fallback rendering if Brier fails */
+}
+
+.type-h2 {
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  font-variation-settings: "wght" 700, "wdth" 93;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.type-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey-1);
+}
+
+.type-meta {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.type-mono {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  color: var(--lime);
+}
