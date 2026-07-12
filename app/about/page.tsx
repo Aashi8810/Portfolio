@@ -63,123 +63,138 @@ export default function AboutPage() {
         }
       `}</style>
 
-      {/* Main Container Wrapper (§8) */}
-      <div className="min-h-screen bg-[#282C20] text-white pt-24 px-[clamp(1.5rem,4vw,5rem)] pb-24 mx-auto max-w-[1200px]">
+      {/* Screen Wrapper to hold background image and content */}
+      <div className="relative min-h-screen bg-[#282C20] overflow-hidden w-full">
         
-        {/* Page Header Block (§8) */}
-        <header ref={headerRef} className="overflow-hidden mb-12">
-          <p className="text-[0.7rem] tracking-[0.2em] uppercase text-[#B0B5A0] mb-2 font-semibold">
-            {renderSplitText("/ ABOUT")}
-          </p>
-          <h1 className="text-[clamp(4rem,9vw,8.5rem)] font-black tracking-[-0.04em] leading-[0.88] uppercase select-none">
-            {renderSplitText("WHO I ")}
-            <strong className="font-normal font-serif text-[#C8F000] italic">
-              {renderSplitText("AM")}
-            </strong>
-          </h1>
-          <div className="h-[1px] w-full bg-[#D2FF00]/20 mt-6 mb-12" />
-        </header>
+        {/* Background Image Layer */}
+        <div className="absolute top-0 right-0 h-full w-full md:w-[50vw] pointer-events-none z-0 opacity-40 select-none">
+          <img 
+            src="/portfolio-image.jpeg" 
+            alt="Background portrait" 
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Gradient overlay to fade the image into the background color (#282C20) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#282C20] via-[#282C20]/50 to-transparent" />
+        </div>
 
-        {/* Structural Container Layer */}
-        <div ref={contentRef} className="flex flex-col gap-16 w-full">
+        {/* Main Content Container Layer (Lifted above the image with z-10) */}
+        <div className="relative z-10 text-white pt-24 px-[clamp(1.5rem,4vw,5rem)] pb-24 mx-auto max-w-[1200px]">
           
-          {/* Two-Column Matrix Split Layout (§8.6) */}
-          <div className="grid grid-cols-1 md:grid-cols-10 gap-12 items-start w-full">
+          {/* Page Header Block (§8) */}
+          <header ref={headerRef} className="overflow-hidden mb-12">
+            <p className="text-[0.7rem] tracking-[0.2em] uppercase text-[#B0B5A0] mb-2 font-semibold">
+              {renderSplitText("/ ABOUT")}
+            </p>
+            <h1 className="text-[clamp(4rem,9vw,8.5rem)] font-black tracking-[-0.04em] leading-[0.88] uppercase select-none">
+              {renderSplitText("WHO I ")}
+              <strong className="font-normal font-serif text-[#C8F000] italic">
+                {renderSplitText("AM")}
+              </strong>
+            </h1>
+            <div className="h-[1px] w-full bg-[#D2FF00]/20 mt-6 mb-12" />
+          </header>
+
+          {/* Structural Container Layer */}
+          <div ref={contentRef} className="flex flex-col gap-16 w-full">
             
-            {/* Left Column Text Narrative Block (60% equivalent) */}
-            <div className="md:col-span-6 flex flex-col gap-8">
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight uppercase text-white">
-                BUILDING AT THE EDGE OF{" "}
-                <strong className="font-normal font-serif text-[#C8F000] italic">
-                  MACHINE LEARNING
-                </strong>
-              </h2>
+            {/* Two-Column Matrix Split Layout (§8.6) */}
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-12 items-start w-full">
               
-              <div className="flex flex-col gap-6 text-base text-white/72 leading-[1.65] text-pretty max-w-xl">
-                <p>
-                  I architect robust, scalable infrastructure layer systems designed to handle high-concurrency LLM routing, distributed intelligence frameworks, and complex edge compute optimization pipelines.
-                </p>
-                <p>
-                  My work isolates and eliminates operational friction surfaces within deep neural context delivery networks, bridging theoretical optimization strategies directly into predictable production execution paradigms.
-                </p>
+              {/* Left Column Text Narrative Block (60% equivalent) */}
+              <div className="md:col-span-6 flex flex-col gap-8">
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight uppercase text-white">
+                  BUILDING AT THE EDGE OF{" "}
+                  <strong className="font-normal font-serif text-[#C8F000] italic">
+                    MACHINE LEARNING
+                  </strong>
+                </h2>
+                
+                <div className="flex flex-col gap-6 text-base text-white/72 leading-[1.65] text-pretty max-w-xl">
+                  <p>
+                    I architect robust, scalable infrastructure layer systems designed to handle high-concurrency LLM routing, distributed intelligence frameworks, and complex edge compute optimization pipelines.
+                  </p>
+                  <p>
+                    My work isolates and eliminates operational friction surfaces within deep neural context delivery networks, bridging theoretical optimization strategies directly into predictable production execution paradigms.
+                  </p>
+                </div>
               </div>
+
+              {/* Right Column Metrics Grid Block (40% equivalent) */}
+              <div className="md:col-span-4 grid grid-cols-2 gap-x-8 gap-y-12 border-t md:border-t-0 md:border-l border-white/[0.08] pt-12 md:pt-0 md:pl-12 backdrop-blur-[2px] md:backdrop-blur-none bg-[#282C20]/40 md:bg-transparent rounded-lg p-4 md:p-0">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
+                    3+
+                  </span>
+                  <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
+                    YEARS BUILDING
+                  </span>
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
+                    7
+                  </span>
+                  <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
+                    PROJECTS SHIPPED
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
+                    2
+                  </span>
+                  <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
+                    PUBLICATIONS
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
+                    ∞
+                  </span>
+                  <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
+                    THINGS TO LEARN
+                  </span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Right Column Metrics Grid Block (40% equivalent) */}
-            <div className="md:col-span-4 grid grid-cols-2 gap-x-8 gap-y-12 border-t md:border-t-0 md:border-l border-white/[0.08] pt-12 md:pt-0 md:pl-12">
-              <div className="flex flex-col gap-1">
-                <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
-                  3+
-                </span>
-                <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
-                  YEARS BUILDING
-                </span>
-              </div>
-              
-              <div className="flex flex-col gap-1">
-                <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
-                  7
-                </span>
-                <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
-                  PROJECTS SHIPPED
-                </span>
-              </div>
+            {/* Current Execution State Ribbon Bar (§8.6) */}
+            <div className="bg-[#D2FF00]/[0.05] border border-[#D2FF00]/[0.15] backdrop-blur-[4px] rounded-[6px] p-6 md:p-8 w-full mt-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-4">
+                
+                <div className="flex flex-col gap-1">
+                  <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
+                    BUILDING
+                  </span>
+                  <span className="text-[0.85rem] font-semibold text-white uppercase">
+                    [DISTRIBUTED_ORCHESTRATION_ENGINE]
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
-                  2
-                </span>
-                <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
-                  PUBLICATIONS
-                </span>
-              </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
+                    LEARNING
+                  </span>
+                  <span className="text-[0.85rem] font-semibold text-white uppercase">
+                    [SUB_4BIT_QUANTIZATION_KERNELS]
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-[clamp(2.5rem,4vw,4rem)] font-black leading-none text-[#D2FF00]">
-                  ∞
-                </span>
-                <span className="text-[0.7rem] tracking-wider text-[#B0B5A0] uppercase font-semibold">
-                  THINGS TO LEARN
-                </span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
+                    BASED IN
+                  </span>
+                  <span className="text-[0.85rem] font-semibold text-white uppercase">
+                    [COLOMBO_LK]
+                  </span>
+                </div>
+
               </div>
             </div>
 
           </div>
-
-          {/* Current Execution State Ribbon Bar (§8.6) */}
-          <div className="bg-[#D2FF00]/[0.05] border border-[#D2FF00]/[0.15] rounded-[6px] p-6 md:p-8 w-full mt-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-4">
-              
-              <div className="flex flex-col gap-1">
-                <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
-                  BUILDING
-                </span>
-                <span className="text-[0.85rem] font-semibold text-white uppercase">
-                  [DISTRIBUTED_ORCHESTRATION_ENGINE]
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
-                  LEARNING
-                </span>
-                <span className="text-[0.85rem] font-semibold text-white uppercase">
-                  [SUB_4BIT_QUANTIZATION_KERNELS]
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-[0.65rem] tracking-[0.15em] text-[#B0B5A0] uppercase font-medium">
-                  BASED IN
-                </span>
-                <span className="text-[0.85rem] font-semibold text-white uppercase">
-                  [COLOMBO_LK]
-                </span>
-              </div>
-
-            </div>
-          </div>
-
         </div>
       </div>
     </>
