@@ -6,20 +6,20 @@ import { gsap } from "gsap";
 const publicationsData = [
   {
     id: "01",
-    title: "LATENCY OPTIMIZATION IN DISTRIBUTED MULTI-AGENT INFERENCE NETWORKS",
-    venue: "International Conference on Machine Learning Systems (MLSys)",
-    year: "2026",
-    abstract: "This paper introduces a novel execution-fragmentation algorithm targeting multi-agent loops. By deploying deterministic context routers, we minimize cross-node memory overhead during concurrent token delivery windows.",
+    title: "A dual-phase financial strategy for sustainable customer loyalty: Integrating fixed deposits and voucher systems in Sri Lankan supermarket retail",
+    venue: "Economics, Management and Sustainability - Scientific Journal",
+    year: "2025",
+    abstract: "This study develops and evaluates an innovative dual-phase customer loyalty strategy for Sri Lankan supermarkets, integrating fixed deposit investments with voucher-based reward systems to enhance both customer engagement and sustainable business profitability during festive seasons. The research employs a mixed-methods approach, combining financial modelling using the EBITDA framework, customer surveys (n = 250) to analyse spending patterns, and a hypothetical case study with 1,000 participants to assess the strategy's viability during Christmas 2023. The dual-phase model generated projected returns of Rs. 19,135,035.44 from fixed deposits (a 6.3% gross profit margin) and a Rs. 1,113 markup profit per voucher participant, resulting in an overall EBITDA gross profit of Rs. 2,248,035.44 for 1,000 participants. The study contributes to retail management literature by proposing a novel integration of customer investment programs with loyalty systems, extending existing loyalty program theory to emerging market contexts and seasonal retail dynamics. The framework provides retail managers with a structured approach to capitalise on seasonal demand while building long-term customer relationships, particularly applicable to emerging markets where traditional loyalty programs may be insufficient.",
     pdfUrl: "#",
-    doiUrl: "#",
+    doiUrl: "https://doi.org/10.14254/jems.2025.10-1.8",
     arxivUrl: "#",
   },
   {
     id: "02",
-    title: "HYBRID VECTOR-SYMBOLIC ARCHITECTURES FOR REDUCING HALLUCINATION DYNAMICS",
-    venue: "Journal of Artificial Intelligence Research (JAIR)",
-    year: "2025",
-    abstract: "We evaluate structural knowledge graph validation patterns overlaid on dense vector retrieval systems. Our framework enforces strict boundary conditions on unstructured context inputs, leading to quantifiable decreases in factual deviation metrics.",
+    title: "Toward Objective Digital Biomarkers of Bradykinesia A Technology Centric Review of Finger Tapping Assessment in Parkinson’s Disease",
+    venue: "JCos 2026 Faculty of Computing, University Of Sri Jayewardenepura",
+    year: "2026",
+    abstract: "This review explores how modern sensing technologies and machine learning are transforming the assessment of bradykinesia in Parkinson's disease through objective finger-tapping analysis. The paper presents a technology-centric review of three major sensing approaches—wearable sensors, vision-based systems, and smartphone touchscreens—examining their sensing capabilities, signal processing techniques, feature engineering methods, and machine learning pipelines. It compares the strengths and limitations of each modality while discussing challenges such as standardization, device variability, clinical validation, and real-world deployment. The review also identifies emerging research directions, including multimodal sensing, explainable AI, edge computing, and longitudinal monitoring, highlighting their potential to improve digital biomarkers and support future clinical decision-making.",
     pdfUrl: "#",
     doiUrl: "#",
     arxivUrl: "#",
@@ -32,7 +32,7 @@ export default function PublicationsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Character Split Reveal for Page Header (§3 & §8)
+    // Character Split Reveal for Page Header
     const chars = headerRef.current?.querySelectorAll(".split-char");
     if (chars && chars.length > 0) {
       gsap.fromTo(
@@ -48,7 +48,7 @@ export default function PublicationsPage() {
       );
     }
 
-    // Fade and lift entry for the publication items (§3)
+    // Fade and lift entry for the publication items
     const items = listRef.current?.querySelectorAll(".publication-entry");
     if (items && items.length > 0) {
       gsap.fromTo(
@@ -57,8 +57,8 @@ export default function PublicationsPage() {
         {
           y: 0,
           opacity: 1,
-          duration: 0.75, // --dur-default
-          ease: "cubic-bezier(0.65, 0.05, 0, 1)", // --ease-default
+          duration: 0.75,
+          ease: "cubic-bezier(0.65, 0.05, 0, 1)",
           stagger: 0.1,
         }
       );
@@ -103,7 +103,7 @@ export default function PublicationsPage() {
           left: 0;
           width: 0;
           height: 1px;
-          background: #d2ff00; /* --lime */
+          background: #d2ff00;
           transition: width 0.3s cubic-bezier(0.65, 0.05, 0, 1);
         }
         .text-link:hover::after {
@@ -111,10 +111,10 @@ export default function PublicationsPage() {
         }
       `}</style>
 
-      {/* Main Container Wrapper Layout (§8) */}
+      {/* Main Container Wrapper Layout */}
       <div className="min-h-screen bg-[#282C20] text-white pt-24 px-[clamp(1.5rem,4vw,5rem)] pb-24 mx-auto max-w-[1200px]">
         
-        {/* Page Header Block (§8) */}
+        {/* Page Header Block */}
         <header ref={headerRef} className="overflow-hidden mb-12">
           <p className="text-[0.7rem] tracking-[0.2em] uppercase text-[#B0B5A0] mb-2 font-semibold">
             {renderSplitText("/ PUBLICATIONS")}
@@ -128,10 +128,9 @@ export default function PublicationsPage() {
           <div className="h-[1px] w-full bg-[#D2FF00]/20 mt-6 mb-16" />
         </header>
 
-        {/* Clean, Numbered List Block Structure (§8.4) */}
+        {/* Clean, Numbered List Block Structure */}
         <div ref={listRef} className="w-full flex flex-col max-w-4xl">
           {publicationsData.length === 0 ? (
-            /* Empty State String Node (§8.4) */
             <span className="text-[0.7rem] tracking-[0.2em] font-mono text-[#6B7060] uppercase select-none">
               IN PROGRESS — CHECK BACK SOON
             </span>
@@ -193,6 +192,8 @@ export default function PublicationsPage() {
                   </a>
                   <a
                     href={paper.doiUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-link text-xs font-semibold text-white hover:text-[#D2FF00] transition-colors duration-200"
                   >
                     → DOI
